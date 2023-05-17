@@ -1,0 +1,88 @@
+import pygame
+import random
+
+# Инициализация Pygame
+pygame.init()
+
+# Размеры окна игры
+WINDOW_WIDTH = 400
+WINDOW_HEIGHT = 600
+
+# Цвета
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# Создание окна игры
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption("Tower Blocks")
+
+clock = pygame.time.Clock()
+
+# Загрузка изображений блоков
+block_images = [
+    pygame.image.load("block1.png").convert_alpha(),
+    pygame.image.load("block2.png").convert_alpha(),
+    pygame.image.load("block3.png").convert_alpha()
+]
+
+# Глобальные переменные
+score = 0
+record = 0
+blocks_fallen = 0
+block_width = block_images[0].get_width()
+block_height = block_images[0].get_height()
+block_x = WINDOW_WIDTH // 2 - block_width // 2
+block_y = 0
+block_speed = 5
+game_over = False
+
+# Функция для вывода текста на экран
+def draw_text(text, font, color, x, y):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.center = (x, y)
+    window.blit(text_surface, text_rect)
+
+# Функция для начала новой игры
+def start_new_game():
+    global block_x, block_y, score, blocks_fallen, game_over
+    block_x = WINDOW_WIDTH // 2 - block_width // 2
+    block_y = 0
+    score = 0
+    blocks_fallen = 0
+    game_over = False
+
+# Основной игровой цикл
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and not game_over:
+                block_y += block_speed
+
+    if not game_over:
+        # Перемещение блока
+        block_y += block_speed
+
+        # Обработка столкновения блока
+        if block_y >= WINDOW_HEIGHT - block_height:
+            blocks_fallen += 1
+            if blocks_fallen >= 3:
+                game_over = True
+                if score > record:
+                    record = score
+            else:
+                score += 1
+                block_x = random.randint(0, WINDOW_WIDTH - block_width)
+                block_y = -block_height
+
+    # Отрисовка фона и блока
+    window.fill(BLACK)
+    window.blit(block_images[blocks_fallen], (block_x, block_y))
+
+    # Отрисовка текста счета и рекорда
+    font = pygame.font.Font(None, 36)
+    draw_text("Score: " + str(score), font, WHITE, WINDOW_WIDTH // 2, 30)
+    draw_text("Record: " + str(record), font, WHITE, WINDOW_WIDTH //
